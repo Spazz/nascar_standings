@@ -28,12 +28,13 @@ options.rows = 32
 options.cols = 64
 options.chain_length = 1
 options.parallel = 1
-options.brightness = 50
-options.gpio_slowdown = 2
+options.brightness = 100
+options.gpio_slowdown = 5
+options.pixel_mapper_config = "Rotate:90"
 matrix = RGBMatrix(options=options)
 
 font = graphics.Font()
-font.LoadFont("rpi-rgb-led-matrix/fonts/7x13.bdf")
+font.LoadFont("../rpi-rgb-led-matrix/fonts/7x13.bdf")
 white = graphics.Color(255, 255, 255)
 yellow = graphics.Color(255, 255, 0)
 red = graphics.Color(255, 0, 0)
@@ -49,7 +50,7 @@ def draw_digit(canvas, digit, top_row, left_col, color):
 
 def draw_background(canvas, flag_state):
     bg_color = get_flag_state_color(flag_state)
-    for y in range(options.rows):
+    for y in range(options.cols):
         for x in range(15):  # Left part of the matrix (you can adjust this)
             canvas.SetPixel(x, y, bg_color[0], bg_color[1], bg_color[2])
 
