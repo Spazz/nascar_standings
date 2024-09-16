@@ -1,7 +1,6 @@
 from flask import Flask, jsonify, render_template
 from nascar import NASCARFeed
-import random
-import threading
+import random, threading, json
 
 # Create the Flask app
 app = Flask(__name__)
@@ -36,31 +35,47 @@ def data():
             'race_id': nascar_feed.race.race_id,
             'track_name': nascar_feed.race.track_name,
             'current_lap': nascar_feed.race.current_lap,
-            'flag_state': nascar_feed.race.flag_state
+            'flag_state': nascar_feed.race.flag_state,
+            'elapsed_time': nascar_feed.race.elapsed_time,
+            'laps_to_go': nascar_feed.race.laps_to_go,
+            'laps_in_race': nascar_feed.race.laps_in_race,
+            'run_name': nascar_feed.race.run_name,
+            'track_length': nascar_feed.race.track_length
             },
         'car_data': [car.__dict__ for car in nascar_feed.race.cars]
     }
     return jsonify(race_info)
 
+def generate_mock_data():
+    from mock_race_data import generate_race_data
+    return generate_race_data()
+
+# Route to return mock car data as JSON
 @app.route('/mock-data')
 def mock_data():
-    nascar_feed = NASCARFeed(API_URL)
-    nascar_feed.fetch_data()
+
+    race_data = generate_mock_data()
+    # print(json.dumps(race_data, indent=1))
+
+    return jsonify(race_data)
+
+    # nascar_feed = NASCARFeed(API_URL)
+    # nascar_feed.fetch_data()
 
     # Generate mock data
-    mock_car_data = []
+    # mock_car_data = []
     
-    for car in nascar_feed.cars:
-        car_number = car.car_number
-        # Use the current state for DVP and on_track, or the real API values
-        mock_car_data.append({
-            'position': car.position,
-            'car_number': car_number,
-            'is_on_track': car_states[car_number]['is_on_track'],
-            'is_on_dvp': car_states[car_number]['is_on_dvp']
-        })
+    # for car in nascar_feed.cars:
+    #     car_number = car.car_number
+    #     # Use the current state for DVP and on_track, or the real API values
+    #     mock_car_data.append({
+    #         'position': car.position,
+    #         'car_number': car_number,
+    #         'is_on_track': car_states[car_number]['is_on_track'],
+    #         'is_on_dvp': car_states[car_number]['is_on_dvp']
+    #     })
 
-    return jsonify(mock_car_data)
+    # return jsonify(mock_car_data)
 
 # Console listener function to update car states dynamically
 def console_listener():

@@ -21,9 +21,10 @@ class Race:
             self.update_from_api(vehicle_data)
 
             # Custom fields
-            self.recent_pit_stop = False
             self.prev_position = self.position
-            self.position_change = {'direction': None, 'timestamp': None}
+            self.recent_pit_stop = False
+            #self.position_change = {'direction': None, 'timestamp': None}
+            
             self.prev_pit_stops = len(self.pit_stops)
             self.last_update = time.time()
 
@@ -42,17 +43,17 @@ class Race:
             self.last_update = time.time()
 
         def update_custom_fields(self):
-            self.check_position_change()
+            #self.check_position_change()
             self.check_pit_stop()
 
-        def check_position_change(self):
-            self.position_change = {'direction':'up', 'timestamp':time.time()} if self.position < self.prev_position else {'direction':'down', 'timestamp':time.time()} if self.position > self.prev_position else self.position_change['direction'] == None
-            self.prev_position = self.position
+        # def check_position_change(self):
+        #     self.position_change = {'direction':'up', 'timestamp':time.time()} if self.position < self.prev_position else {'direction':'down', 'timestamp':time.time()} if self.position > self.prev_position else self.position_change['direction'] == None
+        #     self.prev_position = self.position
 
-        def display_position_change(self):
-            if self.position_change['direction'] and (time.time() - self.position_change['timestamp']) < 3:
-                return True
-            return False
+        # def display_position_change(self):
+        #     if self.position_change['direction'] and (time.time() - self.position_change['timestamp']) < 3:
+        #         return True
+        #     return False
 
         def check_pit_stop(self):
             if len(self.pit_stops) > self.prev_pit_stops:
