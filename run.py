@@ -15,7 +15,7 @@ previous_positions = {}
 previous_pit_stops = {}
 status_lights = {}
 STATUS_LIGHT_DURATION = 3  # Duration for status light (in seconds)
-PIT_STOP_STATUS_LIGHT_DURATION = 3 # Duration for pit stops (in seconds)
+PIT_STOP_STATUS_LIGHT_DURATION = 120 # Duration for pit stops (in seconds)
 
 ##### -- rpi-rgb-led-matrix Setup -- #####
 options = RGBMatrixOptions()
@@ -55,28 +55,28 @@ def convert_to_graphics_color(tuple):
     return graphics.Color(tuple[0], tuple[1], tuple[2])
 
 ##### -- Display Car Information and Status Lights -- #####
-def display_car_info(canvas, car, row, flag_state):
+def display_car_info(canvas, car, row):
+    shifted_row = row - 1
     car_number = car['car_number']
     position = car['position']
     status = car['status']
     pit_stops = car['pit_stops']
 
     # Display Position
-    position_digits = [int(d) for d in str(position)]
     cblack = convert_to_graphics_color(get_color('black'))
 
     position_str = str(position)
     
     if len(position_str) == 1:
-        graphics.DrawText(canvas, font, 8, row + ROWS_PER_CAR, cblack, position_str)
+        graphics.DrawText(canvas, font, 8, shifted_row + ROWS_PER_CAR, cblack, position_str)
     else:
-        graphics.DrawText(canvas, font, 1, row + ROWS_PER_CAR, cblack, position_str[0])
-        graphics.DrawText(canvas, font, 8, row + ROWS_PER_CAR, cblack, position_str[1])
+        graphics.DrawText(canvas, font, 1, shifted_row + ROWS_PER_CAR, cblack, position_str[0])
+        graphics.DrawText(canvas, font, 8, shifted_row + ROWS_PER_CAR, cblack, position_str[1])
 
     car_number_str = str(car_number)
     color = convert_to_graphics_color(get_driver_status_color(status))
 
-    graphics.DrawText(canvas, font, 18, row + ROWS_PER_CAR, color, car_number_str)
+    graphics.DrawText(canvas, font, 18, shifted_row + ROWS_PER_CAR, color, car_number_str)
 
     # if len(position_digits) == 1:
     #     draw_digit(canvas, position_digits[0], row, 8, cblack)  # Single digit
@@ -102,16 +102,16 @@ def display_car_info(canvas, car, row, flag_state):
   
         if elapsed_time < STATUS_LIGHT_DURATION:  # Light stays on for the set duration
             # Display car info and update status lights
-            display_status_lights(car_number, row, canvas, light_info)
+            display_status_lights(car_number, shifted_row, canvas, light_info)
         else:
             # Remove the status light after the duration
             del status_lights[car_number]['position']
 
     # Check pit stop array and display the status LED in the 16th column if necessary
-    display_pit_stop_status(car_number, row, canvas, pit_stops)
+    display_pit_stop_status(car_number, shifted_row, canvas, pit_stops)
 
     # Display DVP status
-    display_dvp_status(car_number, row, canvas, car)
+    display_dvp_status(car_number, shifted_row, canvas, car)
 
 
 ##### -- Track Position Changes and Update Status Lights -- #####
@@ -208,7 +208,7 @@ def display_dvp_status(car_number, row, canvas, car):
         canvas.SetPixel(16, row + 8, r,g,b)
         canvas.SetPixel(17, row + 7, r,g,b)
         canvas.SetPixel(17, row + 8, r,g,b)
-        
+
     else:
         # Set the pixel color
         
@@ -249,7 +249,7 @@ try:
 
         # Display car info and status lights for each car
         for i, car in enumerate(car_data[:DISPLAY_CAR_LIMIT]):
-            display_car_info(canvas, car, (i * ROWS_PER_CAR), race_data.get('flag_state', 1))
+            display_car_info(canvas, car, (i * ROWS_PER_CAR))
 
         # Track car position changes and update status lights
         for car in car_data:
