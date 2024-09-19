@@ -6,3 +6,4 @@
 /static
 /templates
 /__pycache__
+/launch.json
