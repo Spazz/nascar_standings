@@ -192,7 +192,7 @@ def display_dvp_status(car_number, row, canvas, car):
     car_status = car['status']
 
     # Only display DVP if the car is on DVP and the status is 1
-    if is_on_dvp and car_status == 1:
+    if is_on_dvp and car_status != 3:
         r,g,b = (255,0,0)
 
         base_r = 255
