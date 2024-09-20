@@ -1,5 +1,5 @@
 from rgbmatrix import RGBMatrix, RGBMatrixOptions, graphics
-import requests, json, math
+import requests, json, math, argparse
 from time import time, sleep
 from digit_patterns import digit_patterns  # Assuming you have this file with digit patterns
 from utils import get_color, get_driver_status_color, get_flag_state_color
@@ -218,14 +218,27 @@ def display_dvp_status(car_number, row, canvas, car):
         canvas.SetPixel(17, row + 8, 0,0,0)
 
 ##### -- Fetch Car Data from API -- #####
-def fetch_car_data():
+def fetch_car_data(args):
     try:
-        response = requests.get('http://127.0.0.1:5000/mock-data')  # Replace with your API URL
+        response = requests.get('http://127.0.0.1:5000/' + args)  # Replace with your API URL
         response.raise_for_status()
         return response.json()
     except requests.RequestException as e:
         print(f"Error fetching data: {e}")
         return []  # Return empty list if error
+
+def getArgs():
+    parser = argparse.ArgumentParser(description="Run car data display program")
+    
+    group = parser.add_mutually_exclusive_group(required=False)
+    group.add_argument('--mock-data', action='store_true', help="use --mock-data for mock data stream")
+    group.add_argument('--data', action="store_true", help="use --data or leave blank for production stream")
+    args = parser.parse_args()    
+
+    if args.mock_data:
+        return 'mock-data'
+    else:
+        return 'data'
 
 # Main loop
 try:
@@ -237,7 +250,7 @@ try:
 
         # Fetch new data every FETCH_INTERVAL
         if current_time - last_fetch_time >= FETCH_INTERVAL:
-            response_data = fetch_car_data()
+            response_data = fetch_car_data(getArgs())
         
             if response_data:
                 race_data = response_data.get('race_data', {})
