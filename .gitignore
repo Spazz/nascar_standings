@@ -5,7 +5,6 @@
 /Notes.txt
 /static
 /templates
-<<<<<<< HEAD
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -169,7 +168,3 @@ cython_debug/
 #  and can be added to the global gitignore or merged into this file.  For a more nuclear
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
-=======
-/__pycache__
-/launch.json
->>>>>>> 7bf80b6f0d02d8b6ecde67b74b9e2064236ff2ed
