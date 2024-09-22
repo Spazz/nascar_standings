@@ -74,6 +74,10 @@ class Race:
         return new_car
 
     def update_race_data(self, data):
+        if data is None:
+            print("No data received")
+            return
+        
         self.current_lap = data.get('lap_number')
         self.flag_state = data.get('flag_state')
 

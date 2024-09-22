@@ -34,7 +34,7 @@ font.LoadFont("../rpi-rgb-led-matrix/fonts/7x13.bdf")
 white = graphics.Color(255, 255, 255)
 yellow = graphics.Color(255, 0, 255)
 red = graphics.Color(255, 0, 0)
-blue = graphics.Color(0, 0, 255)
+blue = graphics.Color(66, 66, 255)
 green = graphics.Color(0, 255, 0)
 
 ##### -- Helper Functions -- #####
