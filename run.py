@@ -1,7 +1,6 @@
 from rgbmatrix import RGBMatrix, RGBMatrixOptions, graphics
 import requests, json, math, argparse
 from time import time, sleep
-from digit_patterns import digit_patterns  # Assuming you have this file with digit patterns
 from utils import get_color, get_driver_status_color, get_flag_state_color
 
 ##### -- Global Variables for LED base configuration -- #####
@@ -36,14 +35,6 @@ yellow = graphics.Color(255, 0, 255)
 red = graphics.Color(255, 0, 0)
 blue = graphics.Color(66, 66, 255)
 green = graphics.Color(0, 255, 0)
-
-##### -- Helper Functions -- #####
-def draw_digit(canvas, digit, top_row, left_col, color):
-    pattern = digit_patterns.get(digit, [])
-    for y, row in enumerate(pattern):
-        for x, col in enumerate(row):
-            if col == '*':  # LED ON
-                canvas.SetPixel(left_col + x, top_row + y, color[0], color[1], color[2])
 
 def draw_background(canvas, flag_state):
     bg_color = get_flag_state_color(flag_state)
