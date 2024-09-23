@@ -14,7 +14,7 @@ previous_positions = {}
 previous_pit_stops = {}
 status_lights = {}
 STATUS_LIGHT_DURATION = 3  # Duration for status light (in seconds)
-PIT_STOP_STATUS_LIGHT_DURATION = 120 # Duration for pit stops (in seconds)
+PIT_STOP_STATUS_LIGHT_DURATION = 3 # Duration for pit stops (in laps)
 
 ##### -- rpi-rgb-led-matrix Setup -- #####
 options = RGBMatrixOptions()
@@ -99,10 +99,10 @@ def display_car_info(canvas, car, row):
             del status_lights[car_number]['position']
 
     # Check pit stop array and display the status LED in the 16th column if necessary
-    display_pit_stop_status(car_number, shifted_row, canvas, pit_stops)
+    display_pit_stop_status(car, shifted_row, canvas, race_data)
 
     # Display DVP status
-    display_dvp_status(car_number, shifted_row, canvas, car)
+    display_dvp_status(shifted_row, canvas, car)
 
 
 ##### -- Track Position Changes and Update Status Lights -- #####
@@ -152,33 +152,49 @@ def display_status_lights(car_number, row, canvas, light_info):
         # Remove the status light after the duration
         del status_lights[car_number]['position']
 
-def display_pit_stop_status(car_number, row, canvas, current_pit_stops):
-    previous_length = previous_pit_stops.get(car_number, 0)
-    current_length = len(current_pit_stops)
+def display_pit_stop_status(car, row, canvas, race_data):
+    # Get the current lap number
+    current_lap = race_data.get('current_lap', 0)
+    pit_stops = car['pit_stops']
+    car_number = car['vehicle_number']
 
-    # if the pit stop count has increased, show the status light
-    if current_length > previous_length:
+    # No pit stops -- return early
+    if not pit_stops:
+        return
+
+    # Find the most recent pit stop based on pit_in_lap_count
+    latest_pit_stop = pit_stops[-1]
+
+    # Get the lap the car pitted in
+    pit_in_lap = latest_pit_stop.get('pit_in_lap_count', 0)
+
+    # No pit stops within the last duration laps -- return early
+    if current_lap - pit_in_lap > PIT_STOP_STATUS_LIGHT_DURATION:
+        return
+
+    # Check if we should display the pit stop light
+    if current_lap - pit_in_lap <= PIT_STOP_STATUS_LIGHT_DURATION:
         if car_number not in status_lights:
             status_lights[car_number] = {}
-        status_lights[car_number]['pit'] = {'time': time(), 'color': (0,255,0)}
-        
-    if car_number in status_lights and 'pit' in status_lights[car_number]:
-        light_info = status_lights[car_number]['pit']
-        elapsed_time = time() - light_info['time']
 
-        if elapsed_time < PIT_STOP_STATUS_LIGHT_DURATION:
-            r,g,b = light_info['color']
+        # We store the lap the pit stop happened and how long to display it
+        status_lights[car_number]['pit'] = {'pit_in_lap': pit_in_lap, 'duration_laps': PIT_STOP_STATUS_LIGHT_DURATION, 'color': (66,255,66)}
+
+    # Display the pit stop status if it's still within the lap window
+
+    if car_number in status_lights and 'pit' in status_lights[car_number]:
+        pit_info = status_lights[car_number]['pit']
+
+        if current_lap - pit_info['pit_in_lap'] <= pit_info['duration_laps']:
+            r,g,b = pit_info['color']
             canvas.SetPixel(16, row + 4, r,g,b)
             canvas.SetPixel(16, row + 5, r,g,b)
             canvas.SetPixel(17, row + 4, r,g,b)
             canvas.SetPixel(17, row + 5, r,g,b)
         else:
             del status_lights[car_number]['pit']
-    
-    # Update the previous pit stop length
-    previous_pit_stops[car_number] = current_length
 
-def display_dvp_status(car_number, row, canvas, car):
+def display_dvp_status(row, canvas, car):
     is_on_dvp = car['is_on_dvp']
     car_status = car['status']
 
@@ -211,7 +227,7 @@ def display_dvp_status(car_number, row, canvas, car):
 ##### -- Fetch Car Data from API -- #####
 def fetch_car_data(args):
     try:
-        response = requests.get('http://127.0.0.1:5000/' + args)  # Replace with your API URL
+        response = requests.get('http://127.0.0.1:5000/' + args)
         response.raise_for_status()
         return response.json()
     except requests.RequestException as e:
