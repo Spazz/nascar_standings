@@ -1,0 +1,13 @@
+[Unit]
+Description=Bluetooth Discoverable Service
+After=bluetooth.service network.target
+Wants=bluetooth.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /home/pi/make_discoverable.py
+Restart=always
+RestartSec=60
+
+[Install]
+WantedBy=multi-user.target
